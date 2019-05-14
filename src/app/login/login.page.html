@@ -1,0 +1,33 @@
+<ion-content>
+  <ion-grid>
+    <ion-row justify-content-center align-items-center>
+      <ion-col alignself-center>
+        <h2>Welcome to One List by:</h2>
+        <ion-img src="../../assets/icon/LogoBlackLong.png" alt="Teles Apps Logo"></ion-img>
+        <h4>Please <u (click)="setLogin(true)">Login</u> or <u (click)="setLogin(false)">Register</u></h4>
+
+        <form [formGroup]="LoginForm" (ngSubmit)="onLoginOrRegister()">
+          <ion-input formControlName="email" type="email" placeholder="Email"></ion-input>
+          <ion-input formControlName="password" type="password" placeholder="Password"></ion-input>
+          <ion-text *ngIf="LoginForm.touched && LoginForm.get('password').value.length < 6">
+            Password must be at least 6 characters long</ion-text>
+          <ion-input *ngIf="!isLogin" (ionChange)="checkIfMatch()" formControlName="passConfirm" type="password" 
+          placeholder="Confirm Password"></ion-input>
+          <p>{{ loginMessage }}</p>
+          <ion-button type="Submit" [disabled]="!LoginForm.valid">
+            {{ buttonText }}
+          </ion-button>
+        </form>
+        <p>{{ authService.errorMessage }}</p>
+        <p *ngIf="authService.emailSent">An email has been sent, please verify your email before logging in</p>
+        <hr>
+        <p>Or</p>
+        <ion-button size="12" class="googleLoginBtn" color="light" (click)="onGoogleLoginClick()">
+          <span>
+            <ion-icon name="logo-google"></ion-icon> Log in with Google
+          </span>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

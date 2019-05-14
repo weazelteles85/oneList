@@ -1,0 +1,49 @@
+.welcome-card ion-img {
+  max-height: 35vh;
+  overflow: hidden;
+}
+
+.centerText {
+  text-align: center;
+}
+
+.myCheckBox {
+  background-color: #dde2e0;
+  height: 35px;
+  width: 40px;
+  margin-right: 14px;
+  border-radius: 5px;
+  border: 2px solid #2b4e43;
+}
+
+.crossedOff {
+  text-decoration: line-through;
+}
+.marginRight {
+  margin-right: 14px;
+}
+
+ion-icon {
+  position: relative;
+  font-size: 2em;
+  color: #2b4e43;
+  margin: 0px;
+}
+
+ion-item {
+  --max-height: 40px;
+  padding: 2px;
+  --background: #bccbce;
+  border-color: #e9ebe7;
+  font-weight: bold;
+  color: #2b4e43;
+  font-size: 12pt;
+}
+
+ion-button {
+  --background: #e5ae6b;
+  font-size: 12pt;
+  --padding-end: 4px;
+  --padding-start: 4px;
+}
+

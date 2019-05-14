@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-button (click)="closeModal()">
+      <ion-icon slot="icon-only" name="arrow-round-back"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid fixed>
+    <ion-row justify-content-center align-items-center>
+      <ion-col size="12">
+        <p>Please enter the email of the person you want to share with</p>
+        <form *ngIf="!sharing.isLoading" [formGroup]="sendEmailForm" (ngSubmit)="onSendRequest(userInput.value)">
+          <ion-input formControlName="email" autofocus="true" autocomplete="on" #userInput type="email" inputmode="email"
+            placeholder="Email"></ion-input>
+          <ion-button type="submit" [disabled]="sendEmailForm.invalid">
+            <ion-icon slot="start" name="share"></ion-icon>
+            Send Request
+          </ion-button>
+        </form>
+        <div *ngIf="sharing.isLoading">
+          <p>Sending Request</p>
+          <ion-spinner name="lines"></ion-spinner>
+        </div>
+        <p>{{ sharing.errorMessage }}</p>
+        <p>{{ sharing.sendGridErrorMessage }}</p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

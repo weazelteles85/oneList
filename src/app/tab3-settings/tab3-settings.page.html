@@ -1,0 +1,127 @@
+<!-- <ion-header>
+  <ion-toolbar>
+    <ion-title class="centerText">
+      Settings
+    </ion-title>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-content>
+  <ion-grid fixed>
+    <!------------------- List Of Incoming Request Bellow -------------------------->
+    <ion-row>
+      <ion-col size="12">
+        <ng-container *ngIf="dataStorage.listOfIncomingRequest; else noIncomingRequests">
+          <div *ngIf="dataStorage.listOfIncomingRequest.length > 0">
+            <h4>New request to share your shopping list from:</h4>
+            <div *ngFor="let item of dataStorage.listOfIncomingRequest let i=index">
+              <ion-card>
+                <ion-card-header>
+                  <ion-card-title> {{ item }}</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                  <ion-row>
+                    <ion-col size="6">
+                      <ion-button (click)="onDeclineOffer(item, i)">
+                        Decline
+                      </ion-button>
+                    </ion-col>
+                    <ion-col style="text-align:end" size="6">
+                      <ion-button (click)="onAcceptOffer(item, i)">
+                        Accept
+                      </ion-button>
+                    </ion-col>
+                  </ion-row>
+                </ion-card-content>
+              </ion-card>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noIncomingRequests>
+          <!-- Don't show anything if there are no incoming requests -->
+        </ng-template>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="12">
+        <h2 class="centerText">
+          Thank you for trying One List from Teles Apps!
+        </h2>
+        <p class="centerText">This App is currently in Beta Testing, please
+          be patient as we work on optimizing the app for your benefit (v0.6.5)</p>
+      </ion-col>
+    </ion-row>
+    <ion-row justify-content-center>
+      <ion-col class="centerText" size="12">
+        <ng-container *ngIf="authService.localUser.isPremiumUser; else notPremium">
+          <h6>You are a Premium Member!</h6>
+        </ng-container>
+        <ng-template #notPremium>
+          <ion-button color="primary" (click)="navigateToPayment()">
+            Try One List Premium
+          </ion-button>
+        </ng-template>
+      </ion-col>
+    </ion-row>
+    <!---------------------------------- list of requests that are being shared Bellow ----------------------------->
+    <ion-row>
+      <ion-col size="12">
+        <ng-container *ngIf="localListOfEmails; else notSharingAnyEmails">
+          <div *ngIf="localListOfEmails.length > 0">
+            <h4>You are currently sharing your shopping list with:</h4>
+            <ion-item *ngFor="let email of localListOfEmails; let i=index">
+              <ng-container *ngIf="sharing.isLoading; else notLoading">
+                <ion-spinner name="lines"></ion-spinner>
+              </ng-container>
+              <ng-template #notLoading>
+                <ion-label>{{ email }}</ion-label>
+                <ion-button class="cancelShare" (click)="onStopSharing(i)">
+                  <ion-icon slot="icon-only" name="trash"></ion-icon>
+                </ion-button>
+              </ng-template>
+            </ion-item>
+            <!-- <ion-text *ngFor="let email of localListOfEmails; let i=index">
+              <h4>{{ email }}</h4>
+            </ion-text> -->
+          </div>
+        </ng-container>
+        <ng-template #notSharingAnyEmails>
+          <!-- dont show anything if not sharing emails -->
+        </ng-template>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="centerText" size="12">
+        <ion-button color="secondary" (click)="onOpenShareModal()">
+          <ion-icon slot="start" name="share"></ion-icon>
+          Share Shopping List
+        </ion-button>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="12">
+        <p>If you need any assistance, please contact us at <a target="_top" href="mailto:inbox@telesapps.com">inbox@telesApps.com</a></p>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-row>
+      <ion-col size="6">
+        <div *ngIf="authService.localUser">
+          <ion-button *ngIf="authService.localUser.isPremiumUser" color="primary" (click)="navigateToPayment()">
+            Support Us!
+          </ion-button>
+        </div>
+      </ion-col>
+      <ion-col class="alignEnd" size="6">
+        <ion-button color="danger" (click)="onLogOut()">
+          <ion-icon slot="start" name="log-out"></ion-icon>
+          Logout
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

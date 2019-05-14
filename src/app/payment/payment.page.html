@@ -1,0 +1,102 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title class="centerText">Payment</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid class="mainContent" fixed>
+    <ion-row>
+      <ion-col size="12">
+        <h3 class="centerText">
+          With One List Premium you'll have access to unlimited number of recipes, you'll also be able to
+          share your shopping list with as many users as you like.
+        </h3>
+      </ion-col>
+    </ion-row>
+    <div *ngIf="authService.USER | async as user">
+      <ng-container *ngIf="user.isPremiumUser; else elseTemplate">
+        <h5 class="centerText">You are already a Premium Member</h5>
+        <h6 class="centerText">If you'd like to further support Teles Apps we accept donations below</h6>
+      </ng-container>
+      <ng-template #elseTemplate>
+        <h5 class="centerText">Purchase premium now for only $2.99</h5>
+      </ng-template>
+    </div>
+
+    <fieldset>
+      <form #paymentForm="ngForm" (ngSubmit)="submitPayment()" class="checkout">
+        <div class="form-row">
+          <label for="card-info">Pay with Credit or Debit Card</label>
+          <div id="card-element" #cardElement></div>
+          <div id="card-errors" class="help is-danger" role="alert" *ngIf="formError">{{ formError }}</div>
+        </div>
+        <ion-button type="submit" class="button is-info" [disabled]="!formComplete || loading">
+          <ion-spinner *ngIf="loading" name="lines"></ion-spinner>
+          {{ buttonMessage }}
+        </ion-button>
+        <div *ngIf="result?.id" class="notification is-success">
+          Your Payment for {{ result.amount | stripe | currency }} was Successful
+        </div>
+        <!-- If error, show the user the raw error msg from Stripe -->
+        <div *ngIf="result?.error" class="notification is-danger">
+          {{ result.error?.message }}
+        </div>
+        {{ responseMessage }}
+        <div>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </form>
+    </fieldset>
+    <hr>
+    <hr>
+    <ion-grid fixed>
+      <ion-row>
+        <ion-col size="12">
+          <div *ngIf="authService.localUser">
+            <ng-container *ngIf="authService.localUser.premiumCountdown > 0; else isPremium">
+              <h5 class="centerText">You can also attain Premium status by emailing
+                {{ authService.localUser.premiumCountdown }} more friends a link to join us with One
+                List
+              </h5>
+            </ng-container>
+            <ng-template #isPremium>
+              <h5 class="centerText">Invite more friends to join us!</h5>
+            </ng-template>
+
+
+          </div>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col class="centerText" size="12">
+          <ng-container *ngIf="sendGrid.isLoading; else notLoading">
+            <ion-spinner name="lines"></ion-spinner>
+          </ng-container>
+          <ng-template #notLoading>
+            <form *ngIf="!loading" [formGroup]="sendEmailForm" (ngSubmit)="onSendEmail(userInput.value)">
+              <ion-input formControlName="email" autocomplete="on" #userInput type="email" inputmode="email"
+                placeholder="Email"></ion-input>
+              <ion-button type="submit" [disabled]="sendEmailForm.invalid">
+                <ion-icon slot="start" name="share"></ion-icon>
+                Send Email
+              </ion-button>
+            </form>
+          </ng-template>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+
+
+  </ion-grid>
+  <div class="footerSpace"></div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar class="centerText">
+    <ion-button (click)="backToApp()">
+      Back To App
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

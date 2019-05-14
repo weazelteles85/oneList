@@ -1,0 +1,63 @@
+<!-- <ion-header>
+  <ion-toolbar>
+    <ion-title class="centerText">
+      Shopping List
+    </ion-title>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12">
+        <ng-container *ngIf="dataStorage.shoppingList | async as shoppingList; else elseTemplate">
+          <div *ngFor="let ingredient of shoppingList; let i=index">
+            <ion-item>
+              <div class="myCheckBox" (click)="onCheckOffItem(i)" type="button"></div>
+              <!-- <ion-icon slot="start" name="square-outline" (click)="onCheckOffItem(i)"></ion-icon> -->
+              <ion-label>{{ ingredient.Name }}</ion-label>
+            </ion-item>
+          </div>
+        </ng-container>
+        <ng-template #elseTemplate>
+          <div class="centerText">
+            <h3>Your Shopping List is empty</h3>
+            <h5>Try adding items below</h5>
+          </div>
+        </ng-template>
+      </ion-col>
+    </ion-row>
+    <ion-item-divider>
+    </ion-item-divider>
+    <!-- ************************ Checked Off List Bellow ****************** -->
+    <ion-row>
+      <ion-col size="12">
+        <div *ngIf="dataStorage.checkedOffList | async as list">
+          <div *ngFor="let ingredient of list; let i=index">
+            <ion-item>
+              <ion-icon class="marginRight" slot="start" name="undo" (click)="onUndoCheckOff(i)"></ion-icon>
+              <ion-label class="crossedOff">{{ ingredient.Name }}</ion-label>
+              <ion-button (click)="onDeleteItem(i)">
+                <ion-icon slot="icon-only" name="trash"></ion-icon>
+              </ion-button>
+            </ion-item>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <form [formGroup]="addItemForm" (ngSubmit)="onAddItem()">
+      <ion-item>
+        <ion-input placeholder="Enter Item" (keyup.enter)="onAddItem()" clearInput="true" autocomplete="off"
+          formControlName="item" type="text" inputmode="text" spellcheck="true"></ion-input>
+        <ion-button block color="primary" type="submit">
+          Add
+        </ion-button>
+      </ion-item>
+    </form>
+  </ion-toolbar>
+</ion-footer>

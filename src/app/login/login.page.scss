@@ -1,0 +1,30 @@
+ion-grid, ion-row {
+    height: 100%;
+    text-align: center;
+}
+
+ion-grid {
+    background-color: azure;
+}
+
+ion-input {
+    background-color: #dde2e0;
+    margin-top: 8px;
+  }
+
+ion-input.ng-invalid.ng-touched, textarea.ng-invalid.ng-touched {
+    border: 1px solid red;
+}
+
+ion-img {
+    width: 200px;
+    margin: auto;
+}
+
+u {
+    color: #3880ff;
+}
+
+u:hover {
+    cursor: pointer;
+}

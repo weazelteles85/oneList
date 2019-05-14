@@ -1,0 +1,107 @@
+.mainContent {
+}
+
+.centerText {
+  text-align: center;
+}
+
+.paymentAmount {
+  background-color: #beffaa;
+  border: 2px solid #5EA549;
+  border-radius: 8px;
+}
+
+ion-item:hover {
+  background-color: #beffaa;
+}
+
+form.checkout {
+  font-size: 40pt;
+  max-width: 500px;
+  margin: 2rem auto;
+  text-align: center;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  background: white;
+  //font-family: monospace;
+  color: #525252;
+  font-size: 1.1rem;
+}
+button {
+  padding: 0.5rem 1rem;
+  color: white;
+  background: blue;
+  border: none;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+fieldset {
+  font-size: 20pt;
+  border-style: none;
+  padding: 5px;
+  margin-left: -5px;
+  margin-right: -5px;
+  background: #87BCDE;
+  border-radius: 8px;
+  text-align: center;
+}
+
+form, .checkout {
+  min-width: 500px;
+}
+
+button {
+  width: 100%;
+display: block;
+}
+
+.StripeElement {
+  margin: 1rem 0 1rem;
+background-color: white;
+padding: 8px 12px;
+border-radius: 4px;
+border: 1px solid transparent;
+box-shadow: 0 1px 3px 0 #e6ebf1;
+-webkit-transition: box-shadow 150ms ease;
+transition: box-shadow 150ms ease;
+}
+
+.StripeElement:focus {
+  box-shadow: 0 1px 3px 0 #cfd7df
+}
+
+.StripeElement:invalid {
+  border-color: #fa755a
+}
+
+.StripeElement--webkit-autofill {
+  background-color: #a0a0a0 !important
+}
+
+
+// xs 539 and smaller Android Phone
+@media screen and (max-width: 539px) {
+  form.checkout {
+      max-width: 500px;
+      margin: auto;
+      text-align: center;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      padding: 1rem 2rem;
+      background: white;
+      //font-family: monospace;
+      color: #525252;
+      font-size: 1.1rem;
+  }
+
+  form, .checkout {
+      min-width: 300px;
+  }
+
+}
+
+
+
+
