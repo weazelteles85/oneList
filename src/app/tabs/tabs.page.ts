@@ -15,10 +15,9 @@ export class TabsPage implements OnInit, AfterViewInit {
   
 
   constructor(public authService: AuthService, public dataStorage: DataStorageService) { 
-    this.iconSubject.subscribe((icon) => {
-      next: (newIcon) => {icon = newIcon; console.log(`inside Next: ${newIcon}`)}
-      console.log('inside iconSub Subscribe');
-    });
+    // this.iconSubject.subscribe((icon) => {
+    //   next: (newIcon) => {icon = newIcon; console.log(`inside Next: ${newIcon}`)}
+    // });
   }
 
   ngOnInit() {

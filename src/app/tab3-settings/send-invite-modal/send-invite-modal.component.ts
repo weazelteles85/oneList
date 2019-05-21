@@ -26,14 +26,14 @@ export class SendInviteModalComponent implements OnInit {
   onSendRequest(userInput: string) {
     if (userInput != this.authService.localUser.email) {
       console.log(userInput);
-      if (this.authService.localUser.sharedEmails.emails == undefined) {
-        const returnedValue = this.sharing.sendNewShareRequest(userInput);
+      if (this.authService.localUser.sharedEmails.emails === undefined) {
+        const returnedValue = this.sharing.sendNewShareRequest(userInput, true);
         returnedValue
       } else if (this.authService.localUser.sharedEmails.emails.indexOf(userInput) === -1) {
-        this.sharing.sendNewShareRequest(userInput);
+        this.sharing.sendNewShareRequest(userInput, true);
       }
       else {
-        console.error('You already requested to share with this user you dufus');
+        console.error('You already requested to share with this user');
       }
       this.sendEmailForm.get('email').setValue('');
     }

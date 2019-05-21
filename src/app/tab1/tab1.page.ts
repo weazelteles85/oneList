@@ -25,7 +25,7 @@ export class Tab1Page implements OnInit {
         this.router.navigate(['/login']);
       }
       else {
-        this.dataStorage.shoppingList.subscribe();
+        //this.dataStorage.shoppingList.subscribe();
       }
     })
   }
@@ -59,5 +59,9 @@ export class Tab1Page implements OnInit {
   }
 
 
+  testDebug(vars) {
+    console.log('test called');
+    console.log(vars);
+  }
   
 }

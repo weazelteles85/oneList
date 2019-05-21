@@ -15,7 +15,6 @@
             <div *ngFor="let ingredient of shoppingList; let i=index">
               <ion-item>
                 <div class="myCheckBox" (click)="onCheckOffItem(i)" type="button"></div>
-                <!-- <ion-icon slot="start" name="square-outline" (click)="onCheckOffItem(i)"></ion-icon> -->
                 <ion-label>{{ ingredient.Name }}</ion-label>
               </ion-item>
             </div>

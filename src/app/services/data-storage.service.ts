@@ -15,22 +15,12 @@ import { IngredientList } from '../core/ingredient-list.interface';
   providedIn: 'root'
 })
 export class DataStorageService {
-  // unsavedShopping: Array<Ingredient>;
-  // unsavedCheckedOff: Array<Ingredient>;
 
-  // isInitialized: boolean;
-  shoppingList: ReplaySubject<IngredientList> = new ReplaySubject<IngredientList>(3);
-  checkedOffList: ReplaySubject<IngredientList> = new ReplaySubject<IngredientList>(3);
+  shoppingList: Subject<IngredientList> = new Subject<IngredientList>();
+  checkedOffList: Subject<IngredientList> = new Subject<IngredientList>();
 
   shoppingListRef: AngularFirestoreDocument<any>;
   checkedOffListRef: AngularFirestoreDocument<any>;
-  // localUser: User;
-  // localListOfIngredients: Array<Ingredient> = [];
-  // localListOfCheckedOff: Array<Ingredient> = [];
-  // listOfIncomingRequest: Array<string> = [];
-  // cancelShareRequests: Array<string> = [];
-  // localShopping: Array<string> = ['test'];
-  // localCheckedOff: Array<Ingredient>;
   localShopping: Array<Ingredient> = [];
   localCheckedOff: Array<Ingredient> = [];
 
@@ -44,16 +34,18 @@ export class DataStorageService {
       (user) => {
         this.checkIfInviteWasAccpeted();
         this.shoppingListRef = this.afs.doc(`shoppingLists/${user.email}`);
-        this.checkedOffListRef = this.afs.doc(`checkedOffList/${user.email}`);
+        this.checkedOffListRef = this.afs.doc(`checkedOffLists/${user.email}`);
 
         this.afs.doc<Array<Ingredient>>(this.shoppingListRef.ref).valueChanges().subscribe((list) => {
           if (list['ingredientList'] !== undefined) {
+            console.log('value changed');
             this.localShopping = list['ingredientList'];
             this.shoppingList.next(list['ingredientList']);
           }
         });
         this.afs.doc<Array<Ingredient>>(this.checkedOffListRef.ref).valueChanges().subscribe((list) => {
           if (list['ingredientList'] !== undefined) {
+            console.log('ValueChanged Called');
             this.localCheckedOff = list['ingredientList'];
             this.checkedOffList.next(list['ingredientList']);
           }
@@ -86,7 +78,7 @@ export class DataStorageService {
     this.checkedOffListRef.set(ingredientList, { merge: true });
     if (this.authService.localUser.sharedEmails.emails.length > 0) {
       this.authService.localUser.sharedEmails.emails.forEach(otherEmail => {
-        this.updateSharedLists('checkedOffList', otherEmail, this.localCheckedOff);
+        this.updateSharedLists('checkedOffLists', otherEmail, this.localCheckedOff);
       });
     }
   }
@@ -123,10 +115,10 @@ export class DataStorageService {
 
   onShareShoppingListAccepted(email: string, index:number) {
     this.afs.collection('shoppingLists').doc(email).get().subscribe((listsDoc) => {
-      const otherList: Array<Ingredient> = listsDoc.data()['ingredientList'];
+      const otherList: Array<Ingredient> = listsDoc.data()['ingredientLists'];
       this.localShopping = this.sharing.SyncShoppingLists(otherList, this.localShopping);
       this.updateCloudShoppingList();
-      this.updateSharedLists('shoppingList', email, this.localShopping);
+      this.updateSharedLists('shoppingLists', email, this.localShopping);
       this.deleteIncomingRequest(index);
     });
   }
@@ -145,6 +137,7 @@ export class DataStorageService {
         this.localShopping = [];
       }
       this.localShopping.push({ Name: name, Date: Date.now() });
+      this.localShopping = this.sortIngredientsByDate(this.localShopping);
       this.updateCloudShoppingList();
     }
   }
