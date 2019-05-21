@@ -10,15 +10,17 @@
   <ion-grid>
     <ion-row>
       <ion-col size="12">
-        <ng-container *ngIf="dataStorage.shoppingList | async as shoppingList; else elseTemplate">
-          <div *ngFor="let ingredient of shoppingList; let i=index">
-            <ion-item>
-              <div class="myCheckBox" (click)="onCheckOffItem(i)" type="button"></div>
-              <!-- <ion-icon slot="start" name="square-outline" (click)="onCheckOffItem(i)"></ion-icon> -->
-              <ion-label>{{ ingredient.Name }}</ion-label>
-            </ion-item>
-          </div>
-        </ng-container>
+        <div *ngIf="dataStorage.shoppingList | async as shoppingList">
+          <ng-container *ngIf="shoppingList.length > 0; else elseTemplate">
+            <div *ngFor="let ingredient of shoppingList; let i=index">
+              <ion-item>
+                <div class="myCheckBox" (click)="onCheckOffItem(i)" type="button"></div>
+                <!-- <ion-icon slot="start" name="square-outline" (click)="onCheckOffItem(i)"></ion-icon> -->
+                <ion-label>{{ ingredient.Name }}</ion-label>
+              </ion-item>
+            </div>
+          </ng-container>
+        </div>
         <ng-template #elseTemplate>
           <div class="centerText">
             <h3>Your Shopping List is empty</h3>

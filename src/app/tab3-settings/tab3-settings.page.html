@@ -11,32 +11,34 @@
     <!------------------- List Of Incoming Request Bellow -------------------------->
     <ion-row>
       <ion-col size="12">
-        <ng-container *ngIf="dataStorage.listOfIncomingRequest; else noIncomingRequests">
-          <div *ngIf="dataStorage.listOfIncomingRequest.length > 0">
-            <h4>New request to share your shopping list from:</h4>
-            <div *ngFor="let item of dataStorage.listOfIncomingRequest let i=index">
-              <ion-card>
-                <ion-card-header>
-                  <ion-card-title> {{ item }}</ion-card-title>
-                </ion-card-header>
-                <ion-card-content>
-                  <ion-row>
-                    <ion-col size="6">
-                      <ion-button (click)="onDeclineOffer(item, i)">
-                        Decline
-                      </ion-button>
-                    </ion-col>
-                    <ion-col style="text-align:end" size="6">
-                      <ion-button (click)="onAcceptOffer(item, i)">
-                        Accept
-                      </ion-button>
-                    </ion-col>
-                  </ion-row>
-                </ion-card-content>
-              </ion-card>
+        <div *ngIf="authService.USER | async as user">
+          <ng-container *ngIf="user.incomingRequests.emails as emailList; else noIncomingRequests">
+            <div *ngIf="emailList.length > 0">
+              <h4>New request to share your shopping list from:</h4>
+              <div *ngFor="let email of emailList let i=index">
+                <ion-card>
+                  <ion-card-header>
+                    <ion-card-title> {{ email }}</ion-card-title>
+                  </ion-card-header>
+                  <ion-card-content>
+                    <ion-row>
+                      <ion-col size="6">
+                        <ion-button (click)="onDeclineOffer(email, i)">
+                          Decline
+                        </ion-button>
+                      </ion-col>
+                      <ion-col style="text-align:end" size="6">
+                        <ion-button (click)="onAcceptOffer(email, i)">
+                          Accept
+                        </ion-button>
+                      </ion-col>
+                    </ion-row>
+                  </ion-card-content>
+                </ion-card>
+              </div>
             </div>
-          </div>
-        </ng-container>
+          </ng-container>
+        </div>
         <ng-template #noIncomingRequests>
           <!-- Don't show anything if there are no incoming requests -->
         </ng-template>
@@ -100,7 +102,8 @@
     </ion-row>
     <ion-row>
       <ion-col size="12">
-        <p>If you need any assistance, please contact us at <a target="_top" href="mailto:inbox@telesapps.com">inbox@telesApps.com</a></p>
+        <p>If you need any assistance, please contact us at <a target="_top"
+            href="mailto:inbox@telesapps.com">inbox@telesApps.com</a></p>
       </ion-col>
     </ion-row>
   </ion-grid>

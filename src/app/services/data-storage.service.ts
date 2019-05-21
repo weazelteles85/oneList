@@ -9,6 +9,7 @@ import { Ingredient } from '../core/ingredient';
 import { AuthService } from './auth.service';
 import { SharingService } from './sharing.service';
 import { ComponentFactoryResolver } from '@angular/core/src/render3';
+import { IngredientList } from '../core/ingredient-list.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -18,8 +19,8 @@ export class DataStorageService {
   // unsavedCheckedOff: Array<Ingredient>;
 
   // isInitialized: boolean;
-  shoppingList: ReplaySubject<Array<Ingredient>> = new ReplaySubject<Array<Ingredient>>(3);
-  checkedOffList: ReplaySubject<Array<Ingredient>> = new ReplaySubject<Array<Ingredient>>(3);
+  shoppingList: ReplaySubject<IngredientList> = new ReplaySubject<IngredientList>(3);
+  checkedOffList: ReplaySubject<IngredientList> = new ReplaySubject<IngredientList>(3);
 
   shoppingListRef: AngularFirestoreDocument<any>;
   checkedOffListRef: AngularFirestoreDocument<any>;
@@ -41,22 +42,20 @@ export class DataStorageService {
     // Get auth data, then get firestore ListOf Ingredient document || null
     this.authService.USER.subscribe(
       (user) => {
+        this.checkIfInviteWasAccpeted();
         this.shoppingListRef = this.afs.doc(`shoppingLists/${user.email}`);
         this.checkedOffListRef = this.afs.doc(`checkedOffList/${user.email}`);
 
         this.afs.doc<Array<Ingredient>>(this.shoppingListRef.ref).valueChanges().subscribe((list) => {
-          if (list !== undefined) {
-            this.localShopping = list['shoppingList'];
-            this.shoppingList.next(list['shoppingList']);
+          if (list['ingredientList'] !== undefined) {
+            this.localShopping = list['ingredientList'];
+            this.shoppingList.next(list['ingredientList']);
           }
         });
         this.afs.doc<Array<Ingredient>>(this.checkedOffListRef.ref).valueChanges().subscribe((list) => {
-          if (list !== undefined) {
-            console.log('local checked off list = ');
-            console.log(list);
-            this.localCheckedOff = list['checkedOffList'];
-            console.log(this.localCheckedOff);
-            this.checkedOffList.next(list['checkedOffList']);
+          if (list['ingredientList'] !== undefined) {
+            this.localCheckedOff = list['ingredientList'];
+            this.checkedOffList.next(list['ingredientList']);
           }
         });
         // Initialize App for First time if
@@ -73,15 +72,29 @@ export class DataStorageService {
   }
 
   updateCloudShoppingList() {
-    const shoppingListObj = {shoppingList: this.localShopping };
-    this.shoppingListRef.set(shoppingListObj, { merge: true });
+    const ingredientList: IngredientList = { ingredientList: this.localShopping };
+    this.shoppingListRef.set(ingredientList, { merge: true });
+    if (this.authService.localUser.sharedEmails.emails.length > 0) {
+      this.authService.localUser.sharedEmails.emails.forEach(otherEmail => {
+        this.updateSharedLists('shoppingLists', otherEmail, this.localShopping);
+      });
+    }
   }
 
   updateCloudCheckedOffList() {
-    const checkedOffListObj = { checkedOffList: this.localCheckedOff };
-    console.log('Checked Off to cloud called');
-    console.log(checkedOffListObj);
-    this.checkedOffListRef.set(checkedOffListObj, { merge: true });
+    const ingredientList: IngredientList = { ingredientList: this.localCheckedOff };
+    this.checkedOffListRef.set(ingredientList, { merge: true });
+    if (this.authService.localUser.sharedEmails.emails.length > 0) {
+      this.authService.localUser.sharedEmails.emails.forEach(otherEmail => {
+        this.updateSharedLists('checkedOffList', otherEmail, this.localCheckedOff);
+      });
+    }
+  }
+
+  updateSharedLists(location: string, email: string, list: Array<Ingredient>) {
+    const ingredientList: IngredientList = { ingredientList: list };
+    const listRef = this.afs.collection(location).doc(email);
+    listRef.set(ingredientList, { merge: true });
   }
 
   sortIngredientsByDate(arrayToSort: Array<Ingredient>) {
@@ -92,27 +105,46 @@ export class DataStorageService {
     });
   }
 
-  updateSharedLists() {
-
+  checkIfInviteWasAccpeted() {
+    const editedUser = this.authService.localUser;
+    if (this.authService.localUser.incomingRequests.emails.length > 0) {
+      for (let index = 0; index < this.authService.localUser.incomingRequests.emails.length; index++) {
+        const incomingEmail = this.authService.localUser.incomingRequests.emails[index];
+        const requestedEmail = this.authService.localUser.requestedEmails.emails.find(e => e === incomingEmail);
+        if (requestedEmail !== undefined) {
+          editedUser.sharedEmails.emails.push(requestedEmail);
+          editedUser.incomingRequests.emails.splice(index, 1);
+          editedUser.requestedEmails.emails.splice(editedUser.requestedEmails.emails.indexOf(incomingEmail), 1);
+        }
+      }
+      this.authService.updateUserData(editedUser);
+    }
   }
 
-  checkIfInviteWasAccpeted(email: string) {
-    
+  onShareShoppingListAccepted(email: string, index:number) {
+    this.afs.collection('shoppingLists').doc(email).get().subscribe((listsDoc) => {
+      const otherList: Array<Ingredient> = listsDoc.data()['ingredientList'];
+      this.localShopping = this.sharing.SyncShoppingLists(otherList, this.localShopping);
+      this.updateCloudShoppingList();
+      this.updateSharedLists('shoppingList', email, this.localShopping);
+      this.deleteIncomingRequest(index);
+    });
   }
 
   deleteIncomingRequest(index: number) {
-
+    const editedUser: User = this.authService.localUser;
+    editedUser.incomingRequests.emails.splice(index, 1);
+    this.authService.updateUserData(editedUser);
   }
 
-  // **************   Shopping List COntrols Bellow *******************
+  // **************   Shopping List Controls Bellow *******************
 
   addIngredient(name: string) {
     if (this.doesNameExist(name)) {
       if (this.localShopping === undefined) {
         this.localShopping = [];
       }
-      this.localShopping.push({Name: name, Date: Date.now()});
-      console.log('Added to Shopping LISt');
+      this.localShopping.push({ Name: name, Date: Date.now() });
       this.updateCloudShoppingList();
     }
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
-import { AngularFirestoreDocument } from '@angular/fire/firestore';
+import { AngularFirestoreDocument, AngularFirestore } from '@angular/fire/firestore';
 import { User } from '../core/user';
 import { HttpClient } from '@angular/common/http';
 import { Ingredient } from '../core/ingredient';
@@ -21,7 +21,7 @@ export class SharingService {
   isLoading: boolean = false;
 
   shoppingListRef: AngularFirestoreDocument<any>;
-  localUser: User;
+  //localUser: User;
   localShareRequests: Array<string> = [];
 
   //incomingRequests: Subject<Array<string>> = new Subject();
@@ -30,13 +30,10 @@ export class SharingService {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
+    private afs: AngularFirestore,
     private toastController: ToastController,
     public sendGrid: SendGridService) {
-    this.authService.USER.subscribe((user) => {
-      if (user) {
-        this.localUser = user;
-      }
-    })
+
   }
 
   async presentToast(messageToDisplay: string, forMiliseconds: number) {
@@ -48,12 +45,11 @@ export class SharingService {
     toast.present();
   }
 
-  sendNewShareRequest(emailToShareWith: string) {
+  sendNewShareRequest(emailToShareWith: string, sendEmail: boolean) {
     this.isLoading = true;
-    console.log('sendNewShareRequestCalled');
     const data = {
       shareWith: emailToShareWith,
-      fromEmail: this.localUser.email
+      fromEmail: this.authService.localUser.email
     }                                         // Add .pipe(retry(2)).subscribe( to retry this 2 more times
     this.http.post(this.reqShareURL, data, { responseType: 'text' }).subscribe(
       (response) => {
@@ -78,8 +74,10 @@ export class SharingService {
         const emailSubject = 'Lets Share Our Shopping List'
         const htmlBody = `<p>Hey, lets share our shopping list, that way we can keep each other up-to-date on what we need</p>
         <p>simply click <a href="https://onelist.telesapps.com/tabs/(tab3-settings:tab3-settings)">HERE</a></p>
-        <p>Or click on your settings tab at <a href="https://onelist.telesapps.com">https://onelist.telesapps.com</a></p>`
-        this.sendGrid.sendEmail(emailToShareWith, this.authService.localUser.email, emailSubject, htmlBody, false);
+        <p>Or click on your settings tab at <a href="https://onelist.telesapps.com">https://onelist.telesapps.com</a></p>`;
+        if (sendEmail) {
+          this.sendGrid.sendEmail(emailToShareWith, this.authService.localUser.email, emailSubject, htmlBody, false);
+        }
       },
       (error) => {
         this.isLoading = false;
@@ -91,11 +89,13 @@ export class SharingService {
           Once you sign up we'll be able to share our grocery list on any device we use.</p>
           <p>Please create an account by clicking <a href="https://onelist.telesapps.com/login">here </a> or got to: 
           <a href="https://onelist.telesapps.com/login">onelist.telesapps.com</a></p>`;
-          this.sendGrid.sendEmail(emailToShareWith, this.authService.localUser.email, emailSubject, htmlBody, false);
-          this.sendGridErrorMessage = this.sendGrid.errorMessage;
-          this.errorMessage = 'The user with the email address ' + emailToShareWith +
-            ' has not yet created an account with us, we sent them an invitation to join us.' +
-            ' Once they do, you will be able to send them another invitation.';
+          if (sendEmail) {
+            this.sendGrid.sendEmail(emailToShareWith, this.authService.localUser.email, emailSubject, htmlBody, false);
+            this.sendGridErrorMessage = this.sendGrid.errorMessage;
+            this.errorMessage = 'The user with the email address ' + emailToShareWith +
+              ' has not yet created an account with us, we sent them an invitation to join us.' +
+              ' Once they do, you will be able to send them another invitation.';
+          }
           setTimeout(() => {
             this.errorMessage = "";
           }, 30000);
@@ -105,20 +105,28 @@ export class SharingService {
     );
   }
 
-  syncShoppingLists(cloudObj, shoppingList: Array<Ingredient>, checkedOffList: Array<Ingredient>) {
-    console.log('sync list called');
-    const cloudCheckedOff: Array<Ingredient> = <Array<Ingredient>><unknown>Object.values(cloudObj)[1];
-    const cloudShoppingList: Array<Ingredient> = <Array<Ingredient>><unknown>Object.values(cloudObj)[3];
-    const missingFromShopping = cloudShoppingList.filter(ingredient => {
-      return !shoppingList.find(item => item.Name == ingredient.Name);
-    })
-    const missingFromCHeckedOff = cloudCheckedOff.filter(ingrediet => {
-      return !checkedOffList.find(item => item.Name == ingrediet.Name)
-    })
+  // syncShoppingLists(cloudObj, shoppingList: Array<Ingredient>, checkedOffList: Array<Ingredient>) {
+  //   console.log('sync list called');
+  //   const cloudCheckedOff: Array<Ingredient> = <Array<Ingredient>><unknown>Object.values(cloudObj)[1];
+  //   const cloudShoppingList: Array<Ingredient> = <Array<Ingredient>><unknown>Object.values(cloudObj)[3];
+  //   const missingFromShopping = cloudShoppingList.filter(ingredient => {
+  //     return !shoppingList.find(item => item.Name == ingredient.Name);
+  //   })
+  //   const missingFromCHeckedOff = cloudCheckedOff.filter(ingrediet => {
+  //     return !checkedOffList.find(item => item.Name == ingrediet.Name)
+  //   })
 
-    const finalShoppingList = shoppingList.concat(missingFromShopping);
-    const finalCheckedOff = checkedOffList.concat(missingFromCHeckedOff);
-    return { finalCheckedOff, finalShoppingList };
+  //   const finalShoppingList = shoppingList.concat(missingFromShopping);
+  //   const finalCheckedOff = checkedOffList.concat(missingFromCHeckedOff);
+  //   return { finalCheckedOff, finalShoppingList };
+  // }
+
+  SyncShoppingLists(otherList: Array<Ingredient>, myShoppingList: Array<Ingredient>) {
+    const missingFromList: Array<Ingredient> = otherList.filter(ing => {
+      return !myShoppingList.find(item => item.Name === ing.Name);
+    });
+    const finalList = myShoppingList.concat(missingFromList);
+    return finalList;
   }
 
   updateSharedEmails(shoppingList: Array<Ingredient>, checkedOffList: Array<Ingredient>, isInit: boolean) {

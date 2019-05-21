@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { DataStorageService } from '../services/data-storage.service';
 import { AuthService } from '../services/auth.service';
-import { Subject } from 'rxjs';
+import { Subject, ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'app-tabs',
@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 })
 export class TabsPage implements OnInit, AfterViewInit {
 
-  iconSubject: Subject<string> = new Subject<string>();
+  iconSubject: ReplaySubject<string> = new ReplaySubject<string>(1);
 
   
 
@@ -24,15 +24,14 @@ export class TabsPage implements OnInit, AfterViewInit {
   ngOnInit() {
     this.iconSubject.next('cog');
     this.authService.USER.subscribe((user) => {
-      console.log('inside USER.subscribe');
       this.dataStorage.shoppingList.subscribe((list) => {
         if (list) {
-          // if (this.dataStorage.listOfIncomingRequest.length > 0) {
-          //   this.iconSubject.next('alert');
-          // }
-          // else {
-          //   this.iconSubject.next('cog');
-          // }
+          if (this.authService.localUser.incomingRequests.emails.length > 0) {
+            this.iconSubject.next('alert');
+          }
+          else {
+            this.iconSubject.next('cog');
+          }
         }
       })
     });

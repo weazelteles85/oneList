@@ -45,21 +45,43 @@ export class AuthService {
     });
   }
 
+  testSendShareRequest(email: string) {
+    const userRef = this.afs.collection('users', (ref) => ref.where('email', '==', email)).get().subscribe((data) => {
+      console.log(data.docs[0].data());
+    })
+  }
+
   getUser() {
     return this.USER;
   }
 
   // Login/Signup
+  // User Object Creation
+  createNewUser(email: string): User {
+    const user = {
+      numberOfRecipes: 0,
+      isAppsInitialized: false,
+      userName: this.afAuth.auth.currentUser.displayName,
+      email: email,
+      emailVerified: this.afAuth.auth.currentUser.emailVerified,
+      sharedEmails: { emails: [], isSynced: false},
+      requestedEmails: { emails: [], isSynced: false},
+      incomingRequests: { emails: [], isSynced: false},
+      isPremiumUser: false,
+      premiumCountdown: 5,
+      UserId: this.afAuth.auth.currentUser.uid,
+      stripeCustomerId: ''
+    };
+    return user;
+  }
   // Register New User
   registerNewUser(email: string, password: string) {
-    const user: User = new User('unknown', email);
-    console.log(user);
-    this.afAuth.auth.createUserWithEmailAndPassword(user.email, password).catch(
+    this.afAuth.auth.createUserWithEmailAndPassword(email, password).catch(
       error => console.error(error)
     ).then(
       (response) => {
         const authUser = this.afAuth.auth.currentUser;
-        user.UserId = authUser.uid;
+        const user = this.createNewUser(email);
         this.updateUserData(user);
         authUser.sendEmailVerification().then(
           (value) => {
@@ -109,15 +131,12 @@ export class AuthService {
       .then((credential) => {
         this.USER.subscribe((user) => {
           if (!user) {
-            const userData: User = new User(
-              this.afAuth.auth.currentUser.displayName,
-              this.afAuth.auth.currentUser.email)
-            userData.UserId = this.afAuth.auth.currentUser.uid;
+            const userData: User = this.createNewUser(credential.user.email);
             userData.emailVerified = true;
             return this.updateUserData(userData);
           }
           else {
-            this.router.navigate(['/'])
+            this.router.navigate(['/']);
             return this.afs.doc(`users/${credential.user.uid}`);
           }
         });
@@ -137,7 +156,7 @@ export class AuthService {
 
   isLoggedIn() {
 
-    console.log(this.localUser)
+    console.log(this.localUser);
   }
 
   // Used by the http interceptor to set the auth header

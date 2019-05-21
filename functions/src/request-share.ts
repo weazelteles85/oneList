@@ -13,21 +13,22 @@ export const sendShareRequest = functions.https.onRequest((request, response) =>
         const sharingWith = request.body.shareWith;
         const fromEmail = request.body.fromEmail;
 
-        const documentRef = db.collection("shoppingLists").doc(sharingWith);
-
-        documentRef.update({
-            incomingRequests: admin.firestore.FieldValue.arrayUnion(fromEmail)
-        }).then((res) => {
-            console.log(res);
-            response.status(200).send('New share request sent to: ' + sharingWith);
-        }).catch((err) => {
-            console.log(err.message);
-            if (err.code == '5') {
+        const usersRef = db.collection('users');
+        usersRef.where('email', '==', sharingWith).get().then((usersSnapshot) => {
+            if(usersSnapshot.empty) {
                 response.status(499).send('Email Not Found');
             }
-            else {
+            const userToShareWith = usersSnapshot.docs[0].data();
+            console.log(usersSnapshot.docs)
+            console.log(userToShareWith);
+            userToShareWith.incomingRequests.emails.push(fromEmail);
+            usersRef.doc(userToShareWith.UserId).set(userToShareWith, {merge: true}).then((res) => {
+                response.status(200).send('New share request sent to: ' + sharingWith);
+            }).catch((err) => {
                 response.status(400).send('Something went wrong: ' + err);
-            }
+            })
+        }).catch((err) => {
+            response.status(400).send('Something went wrong: ' + err);
         })
     });
 
