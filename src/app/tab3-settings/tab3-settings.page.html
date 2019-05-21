@@ -5,12 +5,12 @@
     </ion-title>
   </ion-toolbar>
 </ion-header> -->
-
 <ion-content>
   <ion-grid fixed>
     <!------------------- List Of Incoming Request Bellow -------------------------->
     <ion-row>
       <ion-col size="12">
+        <p class="centerText warningText">{{ authService.outdatedVersionMessage }}</p>
         <div *ngIf="authService.USER | async as user">
           <ng-container *ngIf="user.incomingRequests.emails as emailList; else noIncomingRequests">
             <div *ngIf="emailList.length > 0">
@@ -50,7 +50,7 @@
           Thank you for trying One List from Teles Apps!
         </h2>
         <p class="centerText">This App is currently in Beta Testing, please
-          be patient as we work on optimizing the app for your benefit (v0.6.5)</p>
+          be patient as we work on optimizing the app for your benefit (v{{ authService.localAppVersion }})</p>
       </ion-col>
     </ion-row>
     <ion-row justify-content-center>

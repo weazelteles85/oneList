@@ -17,6 +17,9 @@ export class AuthService {
   USER: Observable<User>;
   emailSent = false;
   errorMessage: string;
+  appVersion: Observable<any> = new Observable<any>();
+  localAppVersion = '0.8.0';
+  outdatedVersionMessage = '';
 
   provider: any = new auth.GoogleAuthProvider();
 
@@ -41,7 +44,14 @@ export class AuthService {
           return;
         }
       }
-      this.localUser = user
+      this.localUser = user;
+    });
+    this.appVersion = this.afs.collection('appData').doc('6rlx0hdjnZRRTb8q1tOk').valueChanges();
+    this.appVersion.subscribe((version) => {
+      if (this.localAppVersion !== version['appVersion']) {
+        this.outdatedVersionMessage = `Your App needs to be updated to Version ${version['appVersion']}.
+        your current Version is ${this.localAppVersion}. Try clearing your browser history`;
+      }
     });
   }
 

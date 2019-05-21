@@ -25,7 +25,7 @@ export class TabsPage implements OnInit, AfterViewInit {
     this.authService.USER.subscribe((user) => {
       this.dataStorage.shoppingList.subscribe((list) => {
         if (list) {
-          if (this.authService.localUser.incomingRequests.emails.length > 0) {
+          if (this.authService.localUser.incomingRequests.emails.length > 0 || this.authService.outdatedVersionMessage !== '') {
             this.iconSubject.next('alert');
           }
           else {
