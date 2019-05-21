@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
 export class Tab3SettingsPage {
 
   //localListOfRequests: Array<string>;
-  localListOfEmails: Array<string>;
+  //localListOfEmails: Array<string>;
 
   constructor(public sharing: SharingService,
     public dataStorage: DataStorageService,
@@ -24,19 +24,19 @@ export class Tab3SettingsPage {
     public modalController: ModalController,
     private router: Router) {
     //this.authService.USER.subscribe(user => this.localListOfEmails = Object.values(user.sharedEmails.emails));
-    this.localListOfEmails = this.authService.localUser.sharedEmails.emails;
+    //this.localListOfEmails = this.authService.localUser.sharedEmails.emails;
   }
 
   onAcceptOffer(email: string, index: number) {
     this.dataStorage.onShareShoppingListAccepted(email, index);
 
-    const editedUser: User = this.authService.localUser;
-    editedUser.sharedEmails.emails.push(email);
-    editedUser.sharedEmails.isSynced = false; // <-- informs that this users lists need to be synced.
-    this.authService.updateUserData(editedUser); //<--Updates User On Server with new shared email data
-    this.dataStorage.deleteIncomingRequest(index); // <-- Deleted Incoming requests and updates cloud
-    this.sharing.sendNewShareRequest(email, false); // <-- Sends a new function to the original caller requesting invite
-    //this.dataStorage.updatePendingRequests();
+    // const editedUser: User = this.authService.localUser;
+    // editedUser.sharedEmails.emails.push(email);
+    // editedUser.sharedEmails.isSynced = false; // <-- informs that this users lists need to be synced.
+    // editedUser.incomingRequests.emails.splice(index, 1);
+    // this.authService.updateUserData(editedUser); //<--Updates User On Server with new shared email data
+    // this.sharing.sendNewShareRequest(email, false); // <-- Sends a new function to the original caller requesting invite
+    // //this.dataStorage.updatePendingRequests();
   }
 
   onDeclineOffer(email: string, index: number) {
@@ -59,7 +59,7 @@ export class Tab3SettingsPage {
   }
 
   onStopSharing(index: number) {
-    const emailToDelete: string = this.localListOfEmails[index];
+    const emailToDelete: string = this.authService.localUser.sharedEmails.emails[index];
     this.sharing.sendRequestToStopSharing(emailToDelete);
   }
 

@@ -20,20 +20,21 @@ export class Tab1Page implements OnInit {
     public dataStorage: DataStorageService,
     public sharing: SharingService) {
     this.authService.USER.subscribe((user) => {
-      if(!user || user == null) {
+      if(!user || user === undefined) {
         console.log('not logged in');
         this.router.navigate(['/login']);
       }
       else {
         //this.dataStorage.shoppingList.subscribe();
       }
-    })
+    });
+    console.log('Constructor ran');
   }
 
   ngOnInit() {
     this.addItemForm = new FormGroup({
       'item': new FormControl('')
-    })
+    });
   }
 
   onAddItem() {

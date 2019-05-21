@@ -68,10 +68,10 @@
     <!---------------------------------- list of requests that are being shared Bellow ----------------------------->
     <ion-row>
       <ion-col size="12">
-        <ng-container *ngIf="localListOfEmails; else notSharingAnyEmails">
-          <div *ngIf="localListOfEmails.length > 0">
+        <ng-container *ngIf="authService.USER | async as user; else notSharingAnyEmails">
+          <div *ngIf="user.sharedEmails.emails.length > 0">
             <h4>You are currently sharing your shopping list with:</h4>
-            <ion-item *ngFor="let email of localListOfEmails; let i=index">
+            <ion-item *ngFor="let email of user.sharedEmails.emails; let i=index">
               <ng-container *ngIf="sharing.isLoading; else notLoading">
                 <ion-spinner name="lines"></ion-spinner>
               </ng-container>
@@ -88,6 +88,7 @@
           </div>
         </ng-container>
         <ng-template #notSharingAnyEmails>
+          <p>Not Sharing Anything</p>
           <!-- dont show anything if not sharing emails -->
         </ng-template>
       </ion-col>

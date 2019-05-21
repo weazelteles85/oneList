@@ -16,8 +16,8 @@ import { IngredientList } from '../core/ingredient-list.interface';
 })
 export class DataStorageService {
 
-  shoppingList: Subject<IngredientList> = new Subject<IngredientList>();
-  checkedOffList: Subject<IngredientList> = new Subject<IngredientList>();
+  shoppingList: ReplaySubject<IngredientList> = new ReplaySubject<IngredientList>(1);
+  checkedOffList: ReplaySubject<IngredientList> = new ReplaySubject<IngredientList>(1);
 
   shoppingListRef: AngularFirestoreDocument<any>;
   checkedOffListRef: AngularFirestoreDocument<any>;
@@ -32,6 +32,7 @@ export class DataStorageService {
     // Get auth data, then get firestore ListOf Ingredient document || null
     this.authService.USER.subscribe(
       (user) => {
+        console.log('user  subscribed');
         this.checkIfInviteWasAccpeted();
         this.shoppingListRef = this.afs.doc(`shoppingLists/${user.email}`);
         this.checkedOffListRef = this.afs.doc(`checkedOffLists/${user.email}`);
@@ -113,13 +114,21 @@ export class DataStorageService {
     }
   }
 
-  onShareShoppingListAccepted(email: string, index:number) {
+  onShareShoppingListAccepted(email: string, index: number) {
+    console.log(email);
     this.afs.collection('shoppingLists').doc(email).get().subscribe((listsDoc) => {
-      const otherList: Array<Ingredient> = listsDoc.data()['ingredientLists'];
+      const otherList = listsDoc.data()['ingredientList'];
+      console.log(otherList);
       this.localShopping = this.sharing.SyncShoppingLists(otherList, this.localShopping);
+      console.log(this.localShopping);
       this.updateCloudShoppingList();
       this.updateSharedLists('shoppingLists', email, this.localShopping);
-      this.deleteIncomingRequest(index);
+      const editedUser: User = this.authService.localUser;
+      editedUser.sharedEmails.emails.push(email);
+      editedUser.sharedEmails.isSynced = false; // <-- informs that this users lists need to be synced.
+      editedUser.incomingRequests.emails.splice(index, 1);
+      this.authService.updateUserData(editedUser); //<--Updates User On Server with new shared email data
+      this.sharing.sendNewShareRequest(email, false); // <-- Sends a new function to the original caller requesting invite
     });
   }
 

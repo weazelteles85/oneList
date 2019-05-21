@@ -122,9 +122,12 @@ export class SharingService {
   // }
 
   SyncShoppingLists(otherList: Array<Ingredient>, myShoppingList: Array<Ingredient>) {
-    const missingFromList: Array<Ingredient> = otherList.filter(ing => {
-      return !myShoppingList.find(item => item.Name === ing.Name);
-    });
+    let missingFromList: Array<Ingredient>;
+    if (otherList !== undefined) {
+      missingFromList = otherList.filter(ing => {
+        return !myShoppingList.find(item => item.Name === ing.Name);
+      });
+    }
     const finalList = myShoppingList.concat(missingFromList);
     return finalList;
   }
