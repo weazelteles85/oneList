@@ -1,6 +1,8 @@
 {
   "name": "oneList",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular",
   "id": "d36c049b"
 }

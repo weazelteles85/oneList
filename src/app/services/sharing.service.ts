@@ -6,6 +6,8 @@ import { HttpClient } from '@angular/common/http';
 import { Ingredient } from '../core/ingredient';
 import { ToastController } from '@ionic/angular';
 import { SendGridService } from './send-grid.service';
+import { IngredientList } from '../core/ingredient-list.interface';
+import { Subject } from 'rxjs';
 
 
 @Injectable({
@@ -13,19 +15,17 @@ import { SendGridService } from './send-grid.service';
 })
 export class SharingService {
 
-  reqShareURL: string = 'https://us-central1-one-list-e828f.cloudfunctions.net/sendShareRequest';
-  updateSharedURL: string = 'https://us-central1-one-list-e828f.cloudfunctions.net/sendUpdateShared';
-  cancelSharingURL: string = 'https://us-central1-one-list-e828f.cloudfunctions.net/cancelSharingRequest';
-  errorMessage: string = '';
-  sendGridErrorMessage: string = '';
-  isLoading: boolean = false;
+  reqShareURL = 'https://us-central1-one-list-e828f.cloudfunctions.net/sendShareRequest';
+  updateSharedURL = 'https://us-central1-one-list-e828f.cloudfunctions.net/sendUpdateShared';
+  cancelSharingURL = 'https://us-central1-one-list-e828f.cloudfunctions.net/cancelSharingRequest';
+  errorMessage = '';
+  sendGridErrorMessage = '';
+  isLoading = false;
 
   shoppingListRef: AngularFirestoreDocument<any>;
-  //localUser: User;
   localShareRequests: Array<string> = [];
+  isCloudSynced: Subject<boolean> = new Subject<boolean>();
 
-  //incomingRequests: Subject<Array<string>> = new Subject();
-  //localIncomingRequests: Array<string> = [];
 
   constructor(
     private http: HttpClient,
@@ -105,22 +105,6 @@ export class SharingService {
     );
   }
 
-  // syncShoppingLists(cloudObj, shoppingList: Array<Ingredient>, checkedOffList: Array<Ingredient>) {
-  //   console.log('sync list called');
-  //   const cloudCheckedOff: Array<Ingredient> = <Array<Ingredient>><unknown>Object.values(cloudObj)[1];
-  //   const cloudShoppingList: Array<Ingredient> = <Array<Ingredient>><unknown>Object.values(cloudObj)[3];
-  //   const missingFromShopping = cloudShoppingList.filter(ingredient => {
-  //     return !shoppingList.find(item => item.Name == ingredient.Name);
-  //   })
-  //   const missingFromCHeckedOff = cloudCheckedOff.filter(ingrediet => {
-  //     return !checkedOffList.find(item => item.Name == ingrediet.Name)
-  //   })
-
-  //   const finalShoppingList = shoppingList.concat(missingFromShopping);
-  //   const finalCheckedOff = checkedOffList.concat(missingFromCHeckedOff);
-  //   return { finalCheckedOff, finalShoppingList };
-  // }
-
   SyncShoppingLists(otherList: Array<Ingredient>, myShoppingList: Array<Ingredient>) {
     let missingFromList: Array<Ingredient>;
     if (otherList !== undefined) {
@@ -132,35 +116,33 @@ export class SharingService {
     return finalList;
   }
 
-  updateSharedEmails(shoppingList: Array<Ingredient>, checkedOffList: Array<Ingredient>, isInit: boolean) {
-
-    const list1 = shoppingList.map((obj) => { return Object.assign({}, obj) });
-    const list2 = checkedOffList.map((obj) => { return Object.assign({}, obj) });
-    //let incomingReqs = this.listOfIncomingRequest;
-    const ListObj = {
-      isSynced: false,
-      isInitialized: isInit,
-      ingredientList: list1,
-      checkedOffList: list2,
+  getMissingIngredient(otherList: Array<Ingredient>, myList: Array<Ingredient>) {
+    let missingFromList: Array<Ingredient>;
+    if (otherList !== undefined) {
+      missingFromList = myList.filter(ing => {
+        return !otherList.find(item => item.Name === ing.Name);
+      });
     }
+    return missingFromList;
+  }
 
-    const emails = this.authService.localUser.sharedEmails.emails;
-    emails.forEach(email => {
+  updateSharedEmails(email: string, shoppingList: Array<Ingredient>) {
+    const ingredientList: IngredientList = { updatedBy: this.authService.localUser.email, ingredientList: shoppingList };
       const data = {
         shareWith: email,
-        listToShare: ListObj
-      }
+        ingredientList: ingredientList
+      };
       this.http.post(this.updateSharedURL, data, { responseType: 'text' }).subscribe(
         (response) => {
           console.log(response);
+          this.isCloudSynced.next(true);
         },
         (error) => {
-          console.log('there was some problem in updating shared users' + email)
+          console.log('there was some problem in updating shared users' + email);
           console.error(error);
+          this.isCloudSynced.next(false);
         }
       );
-    });
-
   }
 
   sendRequestToStopSharing(email: string) {
@@ -168,7 +150,7 @@ export class SharingService {
     const data = {
       emailToDelete: this.authService.localUser.email,
       userToDeleteFrom: email
-    }
+    };
 
     this.http.post(this.cancelSharingURL, data, { responseType: 'text' }).subscribe(
       (response) => {
@@ -198,19 +180,4 @@ export class SharingService {
     }
     this.authService.updateUserData(editedUser);
   }
-
-  // TestFunction(local: Array<Ingredient>, cloud: Array<Ingredient>) {
-
-  //   const missingFromLocal = cloud.filter(ingredient => {
-  //     return !local.find(item => item.Name == ingredient.Name);
-  //   })
-
-  //   const newwArray = local.concat(missingFromLocal);
-  //   console.log(local);
-  //   console.log(missingFromLocal);
-  //   console.log(newwArray);
-  //   return missingFromLocal
-
-  // }
-
 }

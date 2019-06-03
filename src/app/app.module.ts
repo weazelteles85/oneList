@@ -19,6 +19,7 @@ import { TokenInterceptor } from './core/token.interceptor';
 import { PaymentPageModule } from './payment/payment.module';
 import { PaymentService } from './services/payment.service';
 import { SendGridService } from './services/send-grid.service';
+import { IonicStorageModule } from '@ionic/storage';
 
 
 
@@ -26,9 +27,10 @@ import { SendGridService } from './services/send-grid.service';
   declarations: [AppComponent],
   entryComponents: [],
   imports: [
-    BrowserModule, 
-    IonicModule.forRoot(), 
-    AppRoutingModule, 
+    BrowserModule,
+    IonicModule.forRoot(),
+    IonicStorageModule.forRoot(),
+    AppRoutingModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAuthModule,

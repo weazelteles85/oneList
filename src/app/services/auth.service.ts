@@ -36,6 +36,7 @@ export class AuthService {
     }));
     this.USER.subscribe((user) => {
       if (user) {
+        this.localUser = user;
         if (user.premiumCountdown === 0) {
           const editedUser = user;
           editedUser.premiumCountdown--;
@@ -44,7 +45,6 @@ export class AuthService {
           return;
         }
       }
-      this.localUser = user;
     });
     this.appVersion = this.afs.collection('appData').doc('6rlx0hdjnZRRTb8q1tOk').valueChanges();
     this.appVersion.subscribe((version) => {

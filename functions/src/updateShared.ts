@@ -11,8 +11,8 @@ export const sendUpdateShared = functions.https.onRequest((request, response) =>
     cors(request, response, () => {
 
         const sharingWith = request.body.shareWith;
-        const listToShare = request.body.listToShare
-        db.collection('shoppingLists').doc(sharingWith).set(listToShare, { merge: true }).then(
+        const ingredientList = request.body.ingredientList
+        db.collection('shoppingLists').doc(sharingWith).set(ingredientList, { merge: true }).then(
             (msg) => {
                 console.log('Update Shared Successfull');
                 return response.status(200).send('Updated Shared List:' + sharingWith);
